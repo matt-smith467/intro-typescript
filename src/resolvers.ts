@@ -31,4 +31,33 @@ export const resolvers: Resolvers = {
   Track: {
     durationMs: (parent) => parent.duration_ms,
   },
+  Mutation: {
+    addItemsToPlaylist: async (_, { input }, { dataSources }) => {
+      try {
+        const response = await dataSources.spotifyAPI.addItemsToPlaylist(input);
+        if (response.snapshot_id) {
+          return {
+            code: 200,
+            success: true,
+            message: "Tracks added to playlist!",
+            playlistId: response.snapshot_id,
+          };
+        } else {
+          throw Error("snapshot_id property not found");
+        }
+      } catch (err) {
+        return {
+          code: 500,
+          success: false,
+          message: `Something went wrong: ${err}`,
+          playlistId: null,
+        };
+      }
+    },
+  },
+  AddItemsToPlaylistPayload: {
+    playlist: ({ playlistId }, _, { dataSources }) => {
+      return dataSources.spotifyAPI.getPlaylist(playlistId);
+    },
+  },
 };

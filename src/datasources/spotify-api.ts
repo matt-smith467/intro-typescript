@@ -1,5 +1,5 @@
 import { RESTDataSource } from "@apollo/datasource-rest";
-import { PlaylistModel } from "../models";
+import { PlaylistModel, SnapshotOrError } from "../models";
 // class to allow us to pull data from the Spotify API
 
 export class SpotifyAPI extends RESTDataSource {
@@ -25,5 +25,17 @@ export class SpotifyAPI extends RESTDataSource {
   // method to reach out to REST API and return playlist data
   getPlaylist(playlistId: string): Promise<PlaylistModel> {
     return this.get(`playlists/${playlistId}`);
+  }
+
+  addItemsToPlaylist(input: {
+    playlistId: string;
+    uris: string[];
+  }): Promise<SnapshotOrError> {
+    const { playlistId, uris } = input;
+    return this.post(`playlists/${playlistId}/tracks`, {
+      params: {
+        uris: uris.join(","),
+      },
+    });
   }
 }
